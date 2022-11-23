@@ -6,7 +6,7 @@ function Output = PZA2POL(PZA)
 % 
 %      Polarizaion is in the 64's bit of the 0PVZAAAA bits in PZA
 
-      if (IAND(PZA,int64(64)) == 0)
+      if (IAND(PZA,int16(64)) == 0)
 %         O Polarization
          Output = -90.0;
       else

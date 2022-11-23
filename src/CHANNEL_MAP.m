@@ -66,7 +66,8 @@ IBM = int16([7,3,1,0]);
 
 % ----- Channel to Status Table
 %
-IC2S = int16([[8, 9,10,11,12,13,14,15,0, 1, 2, 3, 4, 5, 6, 7]; ... % T=3 (8 beams, 2 Dopplers)
+IC2S = int16([ ...
+    [8, 9,10,11,12,13,14,15,0, 1, 2, 3, 4, 5, 6, 7]; ... % T=3 (8 beams, 2 Dopplers)
     [8, 9,10,11,12,13,14,15,4, 5, 6, 7, 0, 1, 2, 3]; ... % T=2 (4 beams, 4 Dopplers)
     [8, 9,10,11,12,13,14,15,6, 7, 4, 5, 2, 3, 0, 1]; ... % T=1 (2 beams, 8 Dopplers)
     [8, 9,10,11,12,13,14,15,7, 6, 5, 4, 3, 2, 1, 0]]); % T=0 (1 beam, 16 Dopplers)
@@ -74,11 +75,11 @@ IC2S = int16([[8, 9,10,11,12,13,14,15,0, 1, 2, 3, 4, 5, 6, 7]; ... % T=3 (8 beam
 %     Status to Relative Doppler number.  The first index is
 %     opposite in sense to the previous table.
 % dim 2 is 0-indexed!
-IS2RD = int16([[-1, -1, -1, -1, -1, -1, -1, -1, 1,  1,  1,  1,  1,  1,  1,  1]; ... T=3 (8 beams, 2 Dopplers)
+IS2RD = int16([ ...
+    [-1, -1, -1, -1, -1, -1, -1, -1, 1,  1,  1,  1,  1,  1,  1,  1]; ... T=3 (8 beams, 2 Dopplers)
     [-2, -2, -2, -2, -1, -1, -1, -1, 1,  1,  1,  1,  2,  2,  2,  2 ]; ... % T=2 (4 beams, 4 Dopplers)
     [-4, -4, -3, -3, -2, -2, -1, -1, 1,  1,  2,  2,  3,  3,  4,  4]; ... % T=1 (2 beams, 8 Dopplers)
     [8, -7, -6, -5, -4, -3, -2, -1, 1,  2,  3,  4,  5,  6,  7,  8]]); %  T=0 (1 beam, 16 Dopplers)
-
 
 %      Get the number and spacing for the doppler lines.
 [NDOPP, DFR] = DOP_D256(PREFACE);
@@ -87,29 +88,30 @@ NBEAM = 16/NDOPP;
 %      IDX gives us the Channel-to-Status Table and the
 %      Status-to-Relative-Doppler Table row number to use
 %      What I do here is make IDX the log base 2 of NDOPP
-IDX = 3;
-for I=1:4
-    if ((NDOPP/2^I) == 1)
-        IDX = I;
-    end
-end
+IDX = log2(double(NDOPP));
+
+HDOP = zeros(16,1);
+APOL = zeros(16,1);
+AZ = zeros(16,1);
+ZN = zeros(16,1);
+FRQ = zeros(16,1);
 
 for ICH=1:16
     %         The 'status' value for each channel
-    IST(ICH) = IC2S(IDX,ICH);
+    IST = IC2S(IDX,ICH);
     %         Beam # for this channel
-    IB = IAND(IBM(IDX),IST(ICH));
+%     IB = IAND(IBM(IDX),IST);
     %         Relative Doppler for this 'status'
-    IDD = IS2RD(IDX, IST(ICH)+1); % zero-indexed
-    IRDOP(ICH) = IDD;
+    IDD = IS2RD(IDX, IST+1); % zero-indexed
+%     IRDOP(ICH) = IDD;
     HDOP(ICH) = DFR*double(IDD);
 
     %         Doppler table is complete.
 
     %         Now look up the non-Doppler metadata by the Beam#
     %         using the 'PZA Byte' concept (c.f. Galkin)
-    PZA(ICH) = S2PZA(PREFACE, IST(ICH));
-    APOL(ICH) = PZA2POL(PZA(ICH));
+    PZA = S2PZA(PREFACE, IST);
+    APOL(ICH) = PZA2POL(PZA);
     AZ(ICH) = PZA2AZ(PZA);
     ZN(ICH) = PZA2ZN(PZA);
 

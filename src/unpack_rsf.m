@@ -16,6 +16,8 @@ MASK=int16(255);
 MASKH=int16(248);
 MASKL=int16(7);
 
+%     Extract the 'General Purpose' (i.e. DPS specific) preface from
+%     RSF and  SBF data
 preface = int8(zeros(57,1));
 
 ml = int8(-1);

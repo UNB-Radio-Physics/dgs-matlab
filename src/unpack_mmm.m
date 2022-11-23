@@ -31,7 +31,7 @@ while true
     if (FNOISE == 0.0)
         FNOISE=AMPV(EAMPS,IC,NCHAN,MAPCH,MAXRBIN);
     end
-    fprintf('%.2f %i\n',FREQ, FNOISE)
+
     I = 1:MAXRBIN;
     J = repmat(1,size(I));
     ICS = IC(I);
